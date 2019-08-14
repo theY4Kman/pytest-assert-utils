@@ -1,0 +1,38 @@
+[tool.poetry]
+name = 'pytest-assert-utils'
+version = "0.0.1"
+description = 'Useful assertion utilities for use with pytest'
+license = 'MIT'
+
+authors = [
+    'Zach "theY4Kman" Kanzler <they4kman@gmail.com>'
+]
+
+readme = 'README.md'
+
+repository = 'https://github.com/usePF/pytest-assert-utils'
+homepage = 'https://github.com/usePF/pytest-assert-utils'
+
+keywords = ['pytest']
+classifiers=[
+    'Development Status :: 3 - Alpha',
+    'Programming Language :: Python',
+    'Framework :: Pytest',
+    'License :: OSI Approved :: MIT License',
+    'Topic :: Software Development :: Testing',
+]
+
+
+[tool.poetry.dependencies]
+# Typing annotations are used
+# XXX: for whatever reason, poetry doesn't like `>=3.6` — the additional pin allows locking to work
+python = '^3.6, >= 3.6'
+
+
+[tool.poetry.dev-dependencies]
+pytest = '>=3.6'
+
+
+[build-system]
+requires = ['poetry>=0.12']
+build-backend = 'poetry.masonry.api'
