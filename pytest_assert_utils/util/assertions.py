@@ -22,6 +22,8 @@ def assert_dict_is_subset(subset, superset, recursive=True):
     >>> expected = {'a': 12}
     >>> actual = {'b': 50000}
     >>> assert_dict_is_subset(expected, actual)
+    Traceback (most recent call last):
+     ...
     AssertionError
     """
     superset_slice = _slice_superset(subset, superset, recursive=recursive)
