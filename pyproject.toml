@@ -23,6 +23,10 @@ classifiers=[
 ]
 
 
+[tool.poetry.plugins.pytest11]
+assert_utils = "pytest_assert_utils"
+
+
 [tool.poetry.dependencies]
 # Typing annotations are used
 # XXX: for whatever reason, poetry doesn't like `>=3.6` — the additional pin allows locking to work

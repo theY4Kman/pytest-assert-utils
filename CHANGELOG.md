@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Fixed
+ - Added setuptools entrypoint, so pytest will perform assertion rewriting
 
 
 ## [0.1.0] — 2019-12-08
