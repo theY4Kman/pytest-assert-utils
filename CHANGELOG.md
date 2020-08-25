@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Add documentation to README
+ - Transfer ownership to @theY4Kman
 
 
 ## [0.2.0] — 2020-08-04

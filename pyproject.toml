@@ -10,8 +10,8 @@ authors = [
 
 readme = 'README.md'
 
-repository = 'https://github.com/usePF/pytest-assert-utils'
-homepage = 'https://github.com/usePF/pytest-assert-utils'
+repository = 'https://github.com/theY4Kman/pytest-assert-utils'
+homepage = 'https://github.com/theY4Kman/pytest-assert-utils'
 
 keywords = ['pytest']
 classifiers=[
@@ -20,6 +20,14 @@ classifiers=[
     'Framework :: Pytest',
     'License :: OSI Approved :: MIT License',
     'Topic :: Software Development :: Testing',
+]
+packages = [
+    { include = "pytest_assert_utils" },
+    { include = "tests", format = "sdist" },
+    { include = "pytest.ini", format = "sdist" },
+    { include = "LICENSE", format = "sdist" },
+    { include = "CHANGELOG.md", format = "sdist" },
+    { include = "README.md", format = "sdist" },
 ]
 
 
