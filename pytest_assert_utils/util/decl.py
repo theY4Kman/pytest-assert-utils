@@ -285,7 +285,7 @@ class Set(_CollectionValuesChecker, set, metaclass=_CollectionValuesCheckerMeta)
 
 
 class Dict(_DictValuesChecker, dict, metaclass=_CollectionValuesCheckerMeta):
-    """Special class allowing utils.Any to check items in a dict
+    """Special class enabling equality comparisons to check items in a dict
 
     Examples of functionality:
 
