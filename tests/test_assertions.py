@@ -1,8 +1,29 @@
-from collections import namedtuple
+import sys
 
 import pytest
 
 from pytest_assert_utils import assert_dict_is_subset, assert_model_attrs
+
+if sys.version_info < (3, 7):
+    import collections
+
+    def namedtuple(typename, field_names, *, rename=False, defaults=(), module=None):
+        """Named tuple with defaults support for Python 3.6
+
+        Source: https://stackoverflow.com/a/18348004/148585
+        """
+        typ = collections.namedtuple(typename, field_names, rename=rename, module=module)
+        typ.__new__.__defaults__ = (None,) * len(field_names)
+
+        if isinstance(defaults, collections.Mapping):
+            prototype = typ(**defaults)
+        else:
+            prototype = typ(*defaults)
+
+        typ.__new__.__defaults__ = tuple(prototype)
+        return typ
+else:
+    from collections import namedtuple
 
 
 class DescribeAssertDictIsSubset:

@@ -1,6 +1,10 @@
-import collections
 import inspect
 import typing
+
+try:
+    from collections.abc import Collection as BaseCollection
+except ImportError:
+    from collections import Collection as BaseCollection
 
 __all__ = [
     'Any',
@@ -83,7 +87,7 @@ class Optional:
         return other in (None, self.value)
 
 
-class _CollectionValuesCheckerMeta(type(collections.Collection)):
+class _CollectionValuesCheckerMeta(type(BaseCollection)):
     """Overloads isinstance() to enable truthiness based on values inside the collection
     """
     def __eq__(cls: typing.Type['_CollectionValuesChecker'], instance) -> bool:
@@ -209,7 +213,7 @@ class _DictValuesChecker(_CollectionValuesChecker):
         return k in collection and collection[k] == v
 
 
-class Collection(_CollectionValuesChecker, collections.Collection, metaclass=_CollectionValuesCheckerMeta):
+class Collection(_CollectionValuesChecker, BaseCollection, metaclass=_CollectionValuesCheckerMeta):
     """Special class enabling equality comparisons to check items in any collection (list, set, tuple, etc)
 
     Examples of functionality:
