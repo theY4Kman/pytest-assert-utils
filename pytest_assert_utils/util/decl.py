@@ -103,6 +103,19 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
         if cls._must_contain and not all(cls._collection_contains_(instance, v) for v in cls._must_contain):
             return False
 
+        if cls._must_contain_only and not all(cls._collection_contains_(cls._must_contain_only, v) for v in instance):
+            return False
+
+        if cls._must_contain_exactly:
+            values = list(instance)
+            if len(cls._must_contain_exactly) != len(values):
+                return False
+            for v in cls._must_contain_exactly:
+                try:
+                    values.remove(v)
+                except ValueError:
+                    return False
+
         if cls._must_not_contain and any(cls._collection_contains_(instance, v) for v in cls._must_not_contain):
             return False
 
@@ -120,6 +133,12 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
         if cls._must_contain:
             parts.append(f'containing({cls._repr_containing_(cls._must_contain)})')
 
+        if cls._must_contain_only:
+            parts.append(f'containing_only({cls._repr_containing_(cls._must_contain_only)})')
+
+        if cls._must_contain_exactly:
+            parts.append(f'containing_exactly({cls._repr_containing_(cls._must_contain_exactly)})')
+
         if cls._must_not_contain:
             parts.append(f'not_containing({cls._repr_not_containing_(cls._must_not_contain)})')
 
@@ -128,6 +147,8 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
 
 class _CollectionValuesChecker:
     _must_contain: typing.Tuple = ()
+    _must_contain_only: typing.Tuple = ()
+    _must_contain_exactly: typing.Tuple = ()
     _must_not_contain: typing.Tuple = ()
     _must_be_empty: bool = False
     _must_not_be_empty: bool = False
@@ -147,6 +168,22 @@ class _CollectionValuesChecker:
             *cls._unpack_generators(items),
         )
         return type(cls.__name__, (cls,), {'_must_contain': _must_contain})
+
+    @classmethod
+    def containing_only(cls: T, *items) -> T:
+        _must_contain_only = (
+            *cls._must_contain_only,
+            *cls._unpack_generators(items),
+        )
+        return type(cls.__name__, (cls,), {'_must_contain_only': _must_contain_only})
+
+    @classmethod
+    def containing_exactly(cls: T, *items) -> T:
+        _must_contain_exactly = (
+            *cls._must_contain_exactly,
+            *cls._unpack_generators(items),
+        )
+        return type(cls.__name__, (cls,), {'_must_contain_exactly': _must_contain_exactly})
 
     @classmethod
     def not_containing(cls: T, *items) -> T:
@@ -243,6 +280,26 @@ class List(_CollectionValuesChecker, list, metaclass=_CollectionValuesCheckerMet
     True
     >>> List.containing(1) == [4, 5, 6]
     False
+
+    >>> List.containing_only(1, 2) == [1, 2, 3]
+    False
+    >>> List.containing_only(1, 2) == [1, 2, 2]
+    True
+    >>> List.containing_only(4, 5, 6) == [4, 5, 6]
+    True
+    >>> List.containing_only(4, 5, 6, 7) == [4, 5, 6]
+    True
+
+    >>> List.containing_exactly(1, 2) == [1, 2, 3]
+    False
+    >>> List.containing_exactly(4, 5, 6, 7) == [4, 5, 6]
+    False
+    >>> List.containing_exactly(5, 6, 4) == [4, 5, 6]
+    True
+    >>> List.containing_exactly(4, 5) == [4, 5, 5]
+    False
+    >>> List.containing_exactly(5, 4, 5) == [4, 5, 5]
+    True
 
     >>> List.not_containing(1) == [1, 2, 3]
     False

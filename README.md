@@ -139,6 +139,26 @@ True
 >>> util.List.containing(1) == [4, 5, 6]
 False
 
+>>> util.List.containing_only(1, 2) == [1, 2, 3]
+False
+>>> util.List.containing_only(1, 2) == [1, 2, 2]
+True
+>>> util.List.containing_only(4, 5, 6) == [4, 5, 6]
+True
+>>> util.List.containing_only(4, 5, 6, 7) == [4, 5, 6]
+True
+
+>>> util.List.containing_exactly(1, 2) == [1, 2, 3]
+False
+>>> util.List.containing_exactly(4, 5, 6, 7) == [4, 5, 6]
+False
+>>> util.List.containing_exactly(5, 6, 4) == [4, 5, 6]
+True
+>>> util.List.containing_exactly(4, 5) == [4, 5, 5]
+False
+>>> util.List.containing_exactly(5, 4, 5) == [4, 5, 5]
+True
+
 >>> util.List.not_containing(1) == [1, 2, 3]
 False
 >>> util.List.not_containing(1) == [4, 5, 6]
