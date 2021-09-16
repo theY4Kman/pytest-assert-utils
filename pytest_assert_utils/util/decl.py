@@ -6,6 +6,8 @@ try:
 except ImportError:
     from collections import Collection as BaseCollection
 
+from .assertions import UNSET
+
 __all__ = [
     'Any',
     'Optional',
@@ -14,6 +16,7 @@ __all__ = [
     'Set',
     'Dict',
     'Str',
+    'Model',
 ]
 
 
@@ -419,3 +422,30 @@ class Str(_CollectionValuesChecker, str, metaclass=_CollectionValuesCheckerMeta)
     False
 
     """
+
+
+class Model:
+    """Special class for comparing the equality of attrs of another object
+
+    Examples of functionality:
+    >>> from collections import namedtuple
+    >>> Foo = namedtuple('Foo', 'id,key,other_key,parent', defaults=(None,)*4)
+
+    >>> assert Foo() == Model()
+
+    >>> assert Foo(key='value') == Model(key='value')
+    >>> assert Foo(key='value') == Model(key='not the value')
+    Traceback (most recent call last):
+     ...
+    AssertionError
+
+    >>> assert Foo(key='value', other_key='other_value') ==  Model(key='value')
+    >>> assert [Foo(key='value', other_key='other_value')] ==  List.containing(Model(key='value'))
+
+    """
+
+    def __init__(self, **attrs):
+        self.attrs = attrs
+
+    def __eq__(self, other):
+        return all(getattr(other, k, UNSET) == v for k, v in self.attrs.items())
