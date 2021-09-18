@@ -43,7 +43,9 @@ python = '^3.6, >= 3.6'
 
 [tool.poetry.dev-dependencies]
 pytest = '>=3.6'
+pytest-lambda = "^1.2.5"
 tox = "^3.23.0"
+pytest-icdiff = "^0.5"
 
 
 [build-system]

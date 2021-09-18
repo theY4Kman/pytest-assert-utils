@@ -1,3 +1,4 @@
+import functools
 import inspect
 import typing
 
@@ -21,6 +22,9 @@ __all__ = [
 
 
 T = typing.TypeVar('T')
+
+_CheckerType = typing.TypeVar('_CheckerType', bound=typing.Type['_BaseCollectionValuesChecker'])
+_ItemType = typing.TypeVar('_ItemType')
 
 
 class Any:
@@ -55,10 +59,11 @@ class Any:
     def __repr__(self):
         if not self.allowed_types:
             return '<Any>'
-        elif len(self.allowed_types) == 1:
-            return f'<Any {self.allowed_types[0]!r}>'
         else:
-            return f'<Any {self.allowed_types!r}>'
+            return f'<Any {", ".join(t.__name__ for t in self.allowed_types)}>'
+
+    def __hash__(self):
+        return hash(self.allowed_types)
 
 
 class Optional:
@@ -89,14 +94,24 @@ class Optional:
     def __eq__(self, other):
         return other in (None, self.value)
 
+    def __hash__(self):
+        return hash(self.value)
+
 
 class _CollectionValuesCheckerMeta(type(BaseCollection)):
     """Overloads isinstance() to enable truthiness based on values inside the collection
     """
-    def __eq__(cls: typing.Type['_CollectionValuesChecker'], instance) -> bool:
+
+    def __hash__(cls):
+        return hash(id(cls))
+
+    def __eq__(cls: typing.Type['_BaseCollectionValuesChecker'], instance) -> bool:
         return cls.__instancecheck__(instance)
 
-    def __instancecheck__(cls: typing.Type['_CollectionValuesChecker'], instance) -> bool:
+    def __instancecheck__(cls: typing.Type['_BaseCollectionValuesChecker'], instance) -> bool:
+        if cls._collection_type and not isinstance(instance, cls._collection_type):
+            return False
+
         if cls._must_be_empty and not cls._collection_is_empty_(instance):
             return False
 
@@ -106,11 +121,11 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
         if cls._must_contain and not all(cls._collection_contains_(instance, v) for v in cls._must_contain):
             return False
 
-        if cls._must_contain_only and not all(cls._collection_contains_(cls._must_contain_only, v) for v in instance):
+        if cls._must_contain_only and not all(v in cls._must_contain_only for v in cls._collection_iter_(instance)):
             return False
 
         if cls._must_contain_exactly:
-            values = list(instance)
+            values = list(cls._collection_iter_(instance))
             if len(cls._must_contain_exactly) != len(values):
                 return False
             for v in cls._must_contain_exactly:
@@ -124,7 +139,7 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
 
         return True
 
-    def __repr__(cls: typing.Type['_CollectionValuesChecker']) -> str:
+    def __repr__(cls: typing.Type['_BaseCollectionValuesChecker']) -> str:
         parts = [cls.__name__]
 
         if cls._must_be_empty:
@@ -137,10 +152,10 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
             parts.append(f'containing({cls._repr_containing_(cls._must_contain)})')
 
         if cls._must_contain_only:
-            parts.append(f'containing_only({cls._repr_containing_(cls._must_contain_only)})')
+            parts.append(f'containing_only({cls._repr_containing_only_(cls._must_contain_only)})')
 
         if cls._must_contain_exactly:
-            parts.append(f'containing_exactly({cls._repr_containing_(cls._must_contain_exactly)})')
+            parts.append(f'containing_exactly({cls._repr_containing_exactly_(cls._must_contain_exactly)})')
 
         if cls._must_not_contain:
             parts.append(f'not_containing({cls._repr_not_containing_(cls._must_not_contain)})')
@@ -148,16 +163,39 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
         return '.'.join(parts)
 
 
-class _CollectionValuesChecker:
-    _must_contain: typing.Tuple = ()
-    _must_contain_only: typing.Tuple = ()
-    _must_contain_exactly: typing.Tuple = ()
-    _must_not_contain: typing.Tuple = ()
+class _GenerativeMethod(typing.Protocol):
+    def __call__(cls: _CheckerType, *args, **kwargs) -> _CheckerType: ...
+
+
+def _generative(fn: _GenerativeMethod) -> _GenerativeMethod:
+
+    @functools.wraps(fn)
+    def wrapped(cls: _CheckerType, *args, **kwargs) -> _CheckerType:
+        clone = typing.cast(_CheckerType, type(cls.__name__, (cls,), {}))
+        fn(clone, *args, **kwargs)
+        return clone
+
+    return wrapped
+
+
+class _BaseCollectionValuesChecker(typing.Generic[_ItemType]):
+    _collection_type: typing.Type[BaseCollection] = None
+    _must_contain: typing.Tuple[_ItemType, ...] = ()
+    _must_contain_only: typing.Tuple[_ItemType, ...] = ()
+    _must_contain_exactly: typing.Tuple[_ItemType, ...] = ()
+    _must_not_contain: typing.Tuple[_ItemType, ...] = ()
     _must_be_empty: bool = False
     _must_not_be_empty: bool = False
 
+    def __init_subclass__(cls, **kwargs):
+        cls._collection_type = next((base for base in reversed(cls.__mro__) if issubclass(base, BaseCollection)), None)
+
     @classmethod
-    def _unpack_generators(cls, items):
+    def _process_items(cls, items) -> typing.Iterable[_ItemType]:
+        return cls._unpack_generators(items)
+
+    @classmethod
+    def _unpack_generators(cls, items) -> typing.Iterable[_ItemType]:
         for item in items:
             if inspect.isgenerator(item):
                 yield from item
@@ -165,48 +203,46 @@ class _CollectionValuesChecker:
                 yield item
 
     @classmethod
-    def containing(cls: T, *items) -> T:
-        _must_contain = (
-            *cls._must_contain,
-            *cls._unpack_generators(items),
-        )
-        return type(cls.__name__, (cls,), {'_must_contain': _must_contain})
+    @_generative
+    def containing(cls, *items):
+        cls._must_contain += tuple(cls._process_items(items))
 
     @classmethod
-    def containing_only(cls: T, *items) -> T:
-        _must_contain_only = (
-            *cls._must_contain_only,
-            *cls._unpack_generators(items),
-        )
-        return type(cls.__name__, (cls,), {'_must_contain_only': _must_contain_only})
+    @_generative
+    def containing_only(cls, *items):
+        cls._must_contain_only += tuple(cls._process_items(items))
 
     @classmethod
-    def containing_exactly(cls: T, *items) -> T:
-        _must_contain_exactly = (
-            *cls._must_contain_exactly,
-            *cls._unpack_generators(items),
-        )
-        return type(cls.__name__, (cls,), {'_must_contain_exactly': _must_contain_exactly})
+    @_generative
+    def containing_exactly(cls, *items):
+        cls._must_contain_exactly += tuple(cls._process_items(items))
 
     @classmethod
-    def not_containing(cls: T, *items) -> T:
-        _must_not_contain = (
-            *cls._must_not_contain,
-            *cls._unpack_generators(items),
-        )
-        return type(cls.__name__, (cls,), {'_must_not_contain': _must_not_contain})
+    @_generative
+    def not_containing(cls, *items):
+        cls._must_not_contain += tuple(cls._process_items(items))
 
     @classmethod
-    def empty(cls: T) -> T:
-        return type(cls.__name__, (cls,), {'_must_be_empty': True})
+    @_generative
+    def empty(cls):
+        cls._must_be_empty = True
 
     @classmethod
-    def not_empty(cls: T) -> T:
-        return type(cls.__name__, (cls,), {'_must_not_be_empty': True})
+    @_generative
+    def not_empty(cls):
+        cls._must_not_be_empty = True
 
     @classmethod
     def _repr_containing_(cls, must_contain):
         return ', '.join(repr(item) for item in must_contain)
+
+    @classmethod
+    def _repr_containing_only_(cls, must_not_contain):
+        return cls._repr_containing_(must_not_contain)
+
+    @classmethod
+    def _repr_containing_exactly_(cls, must_not_contain):
+        return cls._repr_containing_(must_not_contain)
 
     @classmethod
     def _repr_not_containing_(cls, must_not_contain):
@@ -220,12 +256,20 @@ class _CollectionValuesChecker:
     def _collection_contains_(cls, collection, v) -> bool:
         return v in collection
 
+    @classmethod
+    def _collection_iter_(cls, collection) -> typing.Iterable[_ItemType]:
+        return collection
 
-class _DictValuesChecker(_CollectionValuesChecker):
+
+class _CollectionValuesChecker(_BaseCollectionValuesChecker[typing.Any]):
+    pass
+
+
+class _DictValuesChecker(_BaseCollectionValuesChecker[typing.Tuple[typing.Hashable, typing.Any]]):
     @classmethod
     def _process_items(
         cls,
-        *items: typing.Union[typing.Hashable, typing.Dict],
+        items: typing.Union[typing.Hashable, typing.Dict],
     ) -> typing.List[typing.Tuple[typing.Hashable, typing.Any]]:
         processed = []
         for item in cls._unpack_generators(items):
@@ -237,11 +281,19 @@ class _DictValuesChecker(_CollectionValuesChecker):
 
     @classmethod
     def containing(cls: T, *items, **kwargs) -> T:
-        return super().containing(*cls._process_items(*items, kwargs))
+        return super().containing(*items, kwargs)
+
+    @classmethod
+    def containing_only(cls: T, *items, **kwargs) -> T:
+        return super().containing_only(*items, kwargs)
+
+    @classmethod
+    def containing_exactly(cls: T, *items, **kwargs) -> T:
+        return super().containing_exactly(*items, kwargs)
 
     @classmethod
     def not_containing(cls: T, *items, **kwargs) -> T:
-        return super().not_containing(*cls._process_items(*items, kwargs))
+        return super().not_containing(*items, kwargs)
 
     @classmethod
     def _repr_containing_(cls, must_contain):
@@ -251,6 +303,10 @@ class _DictValuesChecker(_CollectionValuesChecker):
     def _collection_contains_(cls, collection, v) -> bool:
         k, v = v
         return k in collection and collection[k] == v
+
+    @classmethod
+    def _collection_iter_(cls, collection) -> typing.Iterable[typing.Tuple[typing.Hashable, typing.Any]]:
+        return collection.items()
 
 
 class Collection(_CollectionValuesChecker, BaseCollection, metaclass=_CollectionValuesCheckerMeta):
