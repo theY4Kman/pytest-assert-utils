@@ -448,4 +448,7 @@ class Model:
         self.attrs = attrs
 
     def __eq__(self, other):
-        return all(getattr(other, k, UNSET) == v for k, v in self.attrs.items())
+        try:
+            return all(getattr(other, k) == v for k, v in self.attrs.items())
+        except AttributeError:
+            return False
