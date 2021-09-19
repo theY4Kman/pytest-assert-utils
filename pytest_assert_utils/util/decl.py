@@ -428,6 +428,7 @@ class Model:
     """Special class for comparing the equality of attrs of another object
 
     Examples of functionality:
+
     >>> from collections import namedtuple
     >>> Foo = namedtuple('Foo', 'id,key,other_key,parent', defaults=(None,)*4)
 
