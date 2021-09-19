@@ -440,8 +440,8 @@ class Model:
      ...
     AssertionError
 
-    >>> assert Foo(key='value', other_key='other_value') ==  Model(key='value')
-    >>> assert [Foo(key='value', other_key='other_value')] ==  List.containing(Model(key='value'))
+    >>> assert Foo(key='value', other_key='other_value') == Model(key='value')
+    >>> assert [Foo(key='value', other_key='other_value')] == List.containing(Model(key='value'))
 
     """
 
