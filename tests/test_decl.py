@@ -319,3 +319,17 @@ class DescribeModel:
         expected = util.Model(a='alpha', b='beta')
         actual = create_object_with_attrs(a='alpha')
         assert expected != actual
+
+    class DescribeRepr:
+        def it_includes_attrs_and_values(self):
+            checker = util.Model(uniq1='uniq2', uniq3='uniq4')
+            checker_repr = repr(checker)
+
+            expected = {
+                'uniq1',
+                'uniq2',
+                'uniq3',
+                'uniq4',
+            }
+            actual = {s for s in expected if s in checker_repr}
+            assert actual == expected

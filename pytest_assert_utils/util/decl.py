@@ -505,6 +505,10 @@ class Model:
     def __init__(self, **attrs):
         self.attrs = attrs
 
+    def __repr__(self):
+        attrs_repr = ', '.join(f'{k}={v!r}' for k, v in self.attrs.items())
+        return f'{self.__class__.__name__}({attrs_repr})'
+
     def __eq__(self, other):
         try:
             assert_model_attrs(other, self.attrs)
