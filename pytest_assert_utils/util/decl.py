@@ -2,6 +2,8 @@ import functools
 import inspect
 import typing
 
+from .assertions import assert_model_attrs
+
 try:
     from collections.abc import Collection as BaseCollection
 except ImportError:
@@ -504,6 +506,8 @@ class Model:
 
     def __eq__(self, other):
         try:
-            return all(getattr(other, k) == v for k, v in self.attrs.items())
-        except AttributeError:
+            assert_model_attrs(other, self.attrs)
+        except AssertionError:
             return False
+        else:
+            return True
