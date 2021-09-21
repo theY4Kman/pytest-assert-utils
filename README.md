@@ -275,3 +275,23 @@ True
 >>> util.Str.not_empty() == ''
 False
 ```
+
+## Model
+Special class for comparing the equality of attrs of another object
+
+
+```python
+>>> from collections import namedtuple
+>>> Foo = namedtuple('Foo', 'id,key,other_key,parent', defaults=(None,)*4)
+
+>>> assert Foo() == Model()
+
+>>> assert Foo(key='value') == Model(key='value')
+>>> assert Foo(key='value') == Model(key='not the value')
+Traceback (most recent call last):
+ ...
+AssertionError
+
+>>> assert Foo(key='value', other_key='other_value') == Model(key='value')
+>>> assert [Foo(key='value', other_key='other_value')] == List.containing(Model(key='value'))
+```
