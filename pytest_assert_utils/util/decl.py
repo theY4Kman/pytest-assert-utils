@@ -9,6 +9,11 @@ try:
 except ImportError:
     from collections import Collection as BaseCollection
 
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
+
 __all__ = [
     'Any',
     'Optional',
@@ -163,7 +168,7 @@ class _CollectionValuesCheckerMeta(type(BaseCollection)):
         return '.'.join(parts)
 
 
-class _GenerativeMethod(typing.Protocol):
+class _GenerativeMethod(Protocol):
     def __call__(cls: _CheckerType, *args, **kwargs) -> _CheckerType: ...
 
 
