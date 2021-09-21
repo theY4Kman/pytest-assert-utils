@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
  - Added `containing_only` and `containing_exactly` methods to `util.Collection` classes — see [GH#1](https://github.com/theY4Kman/pytest-assert-utils/pull/1) (thanks, [sjhewitt](https://github.com/sjhewitt))
+ - Added `util.Model` class to check attrs of objects using an equality comparison — see [GH#2](https://github.com/theY4Kman/pytest-assert-utils/pull/2) (thanks, [sjhewitt](https://github.com/sjhewitt))
  - Added tests for `util.Collection` classes
 
 
