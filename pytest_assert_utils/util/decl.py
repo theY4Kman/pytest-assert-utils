@@ -7,8 +7,6 @@ try:
 except ImportError:
     from collections import Collection as BaseCollection
 
-from .assertions import UNSET
-
 __all__ = [
     'Any',
     'Optional',
