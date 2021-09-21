@@ -235,12 +235,12 @@ class _BaseCollectionValuesChecker(typing.Generic[_ItemType]):
         return ', '.join(repr(item) for item in must_contain)
 
     @classmethod
-    def _repr_containing_only_(cls, must_not_contain):
-        return cls._repr_containing_(must_not_contain)
+    def _repr_containing_only_(cls, must_contain_only):
+        return cls._repr_containing_(must_contain_only)
 
     @classmethod
-    def _repr_containing_exactly_(cls, must_not_contain):
-        return cls._repr_containing_(must_not_contain)
+    def _repr_containing_exactly_(cls, must_contain_exactly):
+        return cls._repr_containing_(must_contain_exactly)
 
     @classmethod
     def _repr_not_containing_(cls, must_not_contain):
