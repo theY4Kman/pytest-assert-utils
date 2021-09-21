@@ -502,6 +502,8 @@ class Model:
 
     """
 
+    __slots__ = ('attrs',)
+
     def __init__(self, **attrs):
         self.attrs = attrs
 
