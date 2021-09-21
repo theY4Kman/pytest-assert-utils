@@ -1,3 +1,4 @@
+from dataclasses import make_dataclass
 from datetime import datetime
 from functools import partial
 from typing import Type, TypeVar
@@ -296,3 +297,25 @@ class DescribeCollectionValuesChecker:
             }
             actual = {s for s in expected if s in checker_repr}
             assert actual == expected
+
+
+def create_object_with_attrs(**attrs):
+    cls = make_dataclass('ExampleObject', attrs.keys())
+    return cls(**attrs)
+
+
+class DescribeModel:
+    def it_compares_true_to_object_with_matching_attrs(self):
+        expected = util.Model(a='alpha', b='beta')
+        actual = create_object_with_attrs(a='alpha', b='beta')
+        assert expected == actual
+
+    def it_compares_false_to_object_with_differing_attr_values(self):
+        expected = util.Model(a='alpha', b='beta')
+        actual = create_object_with_attrs(a='agnes', b='bob')
+        assert expected != actual
+
+    def it_compares_false_to_object_with_missing_attr_values(self):
+        expected = util.Model(a='alpha', b='beta')
+        actual = create_object_with_attrs(a='alpha')
+        assert expected != actual
