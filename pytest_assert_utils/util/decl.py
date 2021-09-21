@@ -488,16 +488,17 @@ class Model:
     >>> from collections import namedtuple
     >>> Foo = namedtuple('Foo', 'id,key,other_key,parent', defaults=(None,)*4)
 
-    >>> assert Foo() == Model()
+    >>> Foo() == Model()
+    True
 
-    >>> assert Foo(key='value') == Model(key='value')
-    >>> assert Foo(key='value') == Model(key='not the value')
-    Traceback (most recent call last):
-     ...
-    AssertionError
-
-    >>> assert Foo(key='value', other_key='other_value') == Model(key='value')
-    >>> assert [Foo(key='value', other_key='other_value')] == List.containing(Model(key='value'))
+    >>> Foo(key='value') == Model(key='value')
+    True
+    >>> Foo(key='value') == Model(key='not the value')
+    False
+    >>> Foo(key='value', other_key='other_value') == Model(key='value')
+    True
+    >>> [Foo(key='value', other_key='other_value')] == List.containing(Model(key='value'))
+    True
 
     """
 
