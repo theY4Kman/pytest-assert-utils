@@ -21,7 +21,7 @@ Assert `subset` is a non-strict subset of `superset`
 
 If this assertion fails, a pretty diff will be printed by pytest.
 
-```python
+```pycon
 >>> from pytest_assert_utils import assert_dict_is_subset
 
 >>> expected = {'a': 12}
@@ -45,7 +45,7 @@ Assert a model instance has the specified attr values
 
 May be passed a dict of attrs, or kwargs as attrs
 
-```python
+```pycon
 >>> from pytest_assert_utils import assert_model_attrs
 
 >>> from collections import namedtuple
@@ -66,7 +66,7 @@ AssertionError
 ## Any
 Meta-value which compares True to any object (of the specified type(s))
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Any() == 'stuff'
@@ -87,7 +87,7 @@ False
 ## Optional
 Meta-value which compares True to None or the optionally specified value
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Optional() == None
@@ -110,7 +110,7 @@ False
 ## Collection
 Special class enabling equality comparisons to check items in any collection (list, set, tuple, etc)
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Collection.containing(1) == [1, 2, 3]
@@ -131,7 +131,7 @@ False
 ## List
 Special class enabling equality comparisons to check items in a list
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.List.containing(1) == [1, 2, 3]
@@ -178,7 +178,7 @@ False
 ## Set
 Special class enabling equality comparisons to check items in a set
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Set.containing(1) == {1, 2, 3}
@@ -205,7 +205,7 @@ False
 ## Dict
 Special class enabling equality comparisons to check items in a dict
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Dict.containing('a') == {'a': 1, 'b': 2}
@@ -248,7 +248,7 @@ False
 ## Str
 Special class enabling equality comparisons to check items in a string
 
-```python
+```pycon
 >>> from pytest_assert_utils import util
 
 >>> util.Str.containing('app') == 'apple'
@@ -280,7 +280,7 @@ False
 Special class for comparing the equality of attrs of another object
 
 
-```python
+```pycon
 >>> from collections import namedtuple
 >>> Foo = namedtuple('Foo', 'id,key,other_key,parent', defaults=(None,)*4)
 
