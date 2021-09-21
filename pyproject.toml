@@ -1,6 +1,6 @@
 [tool.poetry]
 name = 'pytest-assert-utils'
-version = "0.2.2"
+version = "0.3.0"
 description = 'Useful assertion utilities for use with pytest'
 license = 'MIT'
 
