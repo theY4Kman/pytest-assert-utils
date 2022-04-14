@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 ## [Unreleased]
+### Added
+ - Add support for Python 3.11
+
 ### Removed
  - Removed support for Python 3.6 (mostly due to poor `typing.Generic` support) — see [GH#3](https://github.com/theY4Kman/pytest-assert-utils/issues/3)
 
