@@ -37,8 +37,8 @@ assert_utils = "pytest_assert_utils"
 
 [tool.poetry.dependencies]
 # Typing annotations are used
-# XXX: for whatever reason, poetry doesn't like `>=3.6` — the additional pin allows locking to work
-python = '^3.6, >= 3.6'
+# XXX: for whatever reason, poetry doesn't like `>=3.7` — the additional pin allows locking to work
+python = '^3.7, >= 3.7'
 
 
 [tool.poetry.dev-dependencies]
